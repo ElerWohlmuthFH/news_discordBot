@@ -3,54 +3,83 @@ package net.teddynator;
 import com.kwabenaberko.newsapilib.NewsApiClient;
 import com.kwabenaberko.newsapilib.models.request.TopHeadlinesRequest;
 import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
-import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.*;
-import org.bukkit.configuration.file.YamlConfiguration;
-
-import java.io.File;
 
 public class News extends ListenerAdapter {
 
     public void onMessageReceived(MessageReceivedEvent event) {
         String[] args = event.getMessage().getContentRaw().split(" ");
-//        User user = event.getAuthor(); //get message Author
-
-//        YamlConfiguration config = YamlConfiguration.loadConfiguration(new File("config.yml"));
-
-//        String prefix = config.getString("prefix");
         String prefix = "/";
 
         if (args[0].equalsIgnoreCase(prefix + "news")) {
 
-            event.getChannel().sendMessage("news :)").queue();
+
+            String searchTerm = "";
+            for (int i = 1; i < args.length-1; i++) {
+                searchTerm = searchTerm + " " + args[i];
+            }
+
+            if(isNumeric(args[args.length-1])){
+
+                int results = Integer.parseInt(args[args.length-1]);
+                news(event.getChannel().asTextChannel(), searchTerm, results);
+            } else {
+                news(event.getChannel().asTextChannel(), searchTerm, 5); //default result count
+            }
         }
     }
 
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
 
-    public static void helloWorld() {
+
+    public void news(TextChannel channel, String keyword, int results) {
 
         String key = "812717347b1b42eb91d185b0f0f9285c";
         NewsApiClient newsApiClient = new NewsApiClient(key);
 
+
         newsApiClient.getTopHeadlines(
+
                 new TopHeadlinesRequest.Builder()
-                        .q("bitcoin")
+                        .q(keyword)
                         .language("en")
                         .build(),
                 new NewsApiClient.ArticlesResponseCallback() {
                     @Override
                     public void onSuccess(ArticleResponse response) {
-                        System.out.println(response.getArticles().get(0).getTitle());
+//                        System.out.println(response.getArticles().get(0).getTitle());
+
+                        try {
+                            for (int i = 0; i < results; i++) {
+                                String news = response.getArticles().get(i).getTitle();
+                                channel.sendMessage(news).queue();
+                            }
+                        } catch (IndexOutOfBoundsException e) {
+                        }
                     }
 
                     @Override
                     public void onFailure(Throwable throwable) {
                         System.out.println(throwable.getMessage());
+
                     }
                 }
         );
+
+
     }
+
+
 }
