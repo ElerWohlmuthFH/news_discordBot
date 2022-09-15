@@ -21,27 +21,27 @@ public class News extends ListenerAdapter {
 
         if (args[0].equalsIgnoreCase(prefix + "news")) {
 
+
             //generates search term
             String searchTerm = "";
             for (int i = 0; i < args.length - 1; i++) {
                 searchTerm = searchTerm + " " + args[i];
             }
 
+
             String language;
             String[] languages = {"de", "en"};
 
 
-            if (Arrays.asList(languages).contains(args[args.length - 2]))
-//                    || !isNumeric(args[args.length - 1]) && args[args.length - 1].length() == 2)
-            {
+//          checks if last or last-1 (only if last is numeric) arg is part of language array
+            if (Arrays.asList(languages).contains(args[args.length - 2])) {
                 language = args[args.length - 2];
             } else if (Arrays.asList(languages).contains(args[args.length - 1])) {
                 language = args[args.length - 1];
-
             } else {
                 language = "en";
             }
-            //checks if last arg is numeric
+//          checks if last arg is numeric
             if (isNumeric(args[args.length - 1])) {
                 int results = Integer.parseInt(args[args.length - 1]);
                 news(event.getChannel().asTextChannel(), searchTerm, language, results);
@@ -69,13 +69,10 @@ public class News extends ListenerAdapter {
         String key = "812717347b1b42eb91d185b0f0f9285c";
         NewsApiClient newsApiClient = new NewsApiClient(key);
 
+
         newsApiClient.getEverything(
 
-                new EverythingRequest.Builder()
-                        .q(keyword)
-                        .language(language)
-                        .build(),
-                new NewsApiClient.ArticlesResponseCallback() {
+                new EverythingRequest.Builder().q(keyword).language(language).build(), new NewsApiClient.ArticlesResponseCallback() {
                     @Override
                     public void onSuccess(ArticleResponse response) {
 //                        System.out.println(response.getArticles().get(0).getTitle());
@@ -83,9 +80,19 @@ public class News extends ListenerAdapter {
                         try {
                             for (int i = 0; i < results; i++) {
                                 String news = response.getArticles().get(i).getUrl();
-                                channel.sendMessage(news).queue();
+                                String titles = response.getArticles().get(i).getTitle();
+                                String articles = response.getArticles().get(i).getDescription();
+                                String output = titles + "\n" + news;
+
+//                                send message with embeds
+//                                channel.sendMessage(news).queue();
+
+//                              send message without embeds
+                                channel.sendMessage(output).queue((message) -> {
+                                    message.suppressEmbeds(true).queue();
+                                });
                             }
-                        } catch (IndexOutOfBoundsException e) {
+                        } catch (IndexOutOfBoundsException ignored) {
                         }
                     }
 
@@ -94,11 +101,12 @@ public class News extends ListenerAdapter {
                         System.out.println(throwable.getMessage());
 
                     }
-                }
-        );
-
+                });
 
     }
 
 
 }
+
+
+
