@@ -16,18 +16,22 @@ public class News extends ListenerAdapter {
 
         if (args[0].equalsIgnoreCase(prefix + "news")) {
 
-        //generates search term
+            //generates search term
             String searchTerm = "";
-            for (int i = 1; i < args.length-1; i++) {
+            for (int i = 0; i < args.length - 1; i++) {
                 searchTerm = searchTerm + " " + args[i];
             }
 
 
             //checks if last arg is numeric
-            if(isNumeric(args[args.length-1])){
-                int results = Integer.parseInt(args[args.length-1]);
+            if (isNumeric(args[args.length - 1])) {
+                int results = Integer.parseInt(args[args.length - 1]);
                 news(event.getChannel().asTextChannel(), searchTerm, results);
-            } else {
+            }
+//            else if(args.length==2){
+//                news(event.getChannel().asTextChannel(), searchTerm, 3);
+//            }
+            else if (args[args.length - 1] != null || !isNumeric(args[args.length - 1])) {
                 news(event.getChannel().asTextChannel(), searchTerm, 5); //default result count
             }
         }
