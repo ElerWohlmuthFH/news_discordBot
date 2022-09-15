@@ -1,6 +1,7 @@
 package net.teddynator;
 
 import com.kwabenaberko.newsapilib.NewsApiClient;
+import com.kwabenaberko.newsapilib.models.request.EverythingRequest;
 import com.kwabenaberko.newsapilib.models.request.TopHeadlinesRequest;
 import com.kwabenaberko.newsapilib.models.response.ArticleResponse;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -15,14 +16,15 @@ public class News extends ListenerAdapter {
 
         if (args[0].equalsIgnoreCase(prefix + "news")) {
 
-
+        //generates search term
             String searchTerm = "";
             for (int i = 1; i < args.length-1; i++) {
                 searchTerm = searchTerm + " " + args[i];
             }
 
-            if(isNumeric(args[args.length-1])){
 
+            //checks if last arg is numeric
+            if(isNumeric(args[args.length-1])){
                 int results = Integer.parseInt(args[args.length-1]);
                 news(event.getChannel().asTextChannel(), searchTerm, results);
             } else {
@@ -50,9 +52,9 @@ public class News extends ListenerAdapter {
         NewsApiClient newsApiClient = new NewsApiClient(key);
 
 
-        newsApiClient.getTopHeadlines(
+        newsApiClient.getEverything(
 
-                new TopHeadlinesRequest.Builder()
+                new EverythingRequest.Builder()
                         .q(keyword)
                         .language("en")
                         .build(),
